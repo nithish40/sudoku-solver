@@ -1,199 +1,133 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include<math.h>
-//generate random value for rows
-int generate_randomr(int n){
-    while(1){
-    int r=(rand() % n)+1;
-    return r;
-    }
-    
-}
-//generate random value for columns
-int generate_randomc(int n){
-    while(1){
-    int r=(rand() % n)+1;
-    return r;
-    }
-    
-}
-//generate random value for value
-int generate_randomv(int n){
-     while(1){
-    int r=(rand() % n)+1;
-     srand(time(NULL));
-    return r;
-    }
-    
-}
-void sudoku(){
-    printf("\t\t\t\t  _____   _   _   ____     ____    _   __  _   _ \n");
-    printf("\t\t\t\t / ____| | | | | |  _ \\   / __ \\  | | / / | | | |\n");
-    printf("\t\t\t\t| (___   | | | | | | | | | |  | | | |/ /  | | | |\n");
-    printf("\t\t\t\t\\____ \\  | | | | | | | | | |  | | | < |   | | | |\n");
-    printf("\t\t\t\t ____) | | |_| | | |_| | | |__| | | |\\ \\  | |_| |\n");
-    printf("\t\t\t\t|_____/  |_____| |____/   \\____/  |_| \\_\\ |_____|\n");
+#include <math.h>
 
+int generate_randomr(int n) {
+    return (rand() % n);
 }
-//Functio  to check and verify the given constraints for a sudoku
-int issafe(int **arr, int row, int col, int val, int n) {
-	    for (int i = 0; i < n; i++) {
-	        if (arr[row][i] == val || arr[i][col] == val)
-	            return 0;
-	    }
-	
-	    int x = sqrt(n);
-	    if (x * x != n) {
-	        if (n % 2 == 0) {
-	            x = n / 2;
-	            for (int i = 0; i < 2; i++) {
-	                for (int j = 0; j < x; j++) {
-	                    if (arr[(row - row % 2) + i][(col - col % x) + j] == val) {
-	                        return 0;
-	                    }
-	                }
-	            }
-	        }
-	    } else {
-	        for (int i = 0; i < n; i++) {
-	            if (arr[(x * (row / x)) + (i / x)][(x * (col / x)) + (i % x)] == val)
-	                return 0;
-	        }
-	    }
-	    return 1;
-	}
-	int k=0,question[100][100];
-	//Function for printing the sudoku
+int generate_randomc(int n) {
+    return (rand() % n);
+}
+int generate_randomv(int n) {
+    return (rand() % n) + 1;
+}
 void print(int **arr, int n) {
-    if(k==0){
-        printf("the question geneterated is :\n");
-        k++;
+    printf("Sudoku board:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++)
+            printf("%d ", arr[i][j]);
+        printf("\n");
     }
-    else
-	    printf("Solution no: %d\n", k++);
-	    for (int i = 0; i < n; i++) {
-	        printf("\t");
-	        for (int j = 0; j < n; j++)
-	            printf("%d ", question[i][j]);
-	        printf("\t\t\t");
-	        for (int j = 0; j < n; j++)
-	            printf("%d ", arr[i][j]);
-	        printf("\n");
-	    }
-	}
-int count,abc=0;
+}
 
-int generate(int **arr,int n){
-     int rows,cols,val;
-        rows=generate_randomr(n);
-        cols=generate_randomc(n);
-        if(arr[rows-1][cols-1]==0){
-        val=generate_randomv(n);
+int issafe(int **arr, int row, int col, int val, int n) {
+    for (int i = 0; i < n; i++) {
+        if (arr[row][i] == val || arr[i][col] == val)
+            return 0;
+    }
+    int sqrt_n = sqrt(n);
+    int box_row_start = row - row % sqrt_n;
+    int box_col_start = col - col % sqrt_n;
+    
+    for (int i = 0; i < sqrt_n; i++) {
+        for (int j = 0; j < sqrt_n; j++) {
+            if (arr[box_row_start + i][box_col_start + j] == val)
+                return 0;
         }
-        else
-        return 0;
-    if(issafe(arr,rows-1,cols-1,val,n)){
-    question[rows-1][cols-1]=arr[rows-1][cols-1]=val;
-    count--;
     }
-    }
-//generates the suduko 
-int generate_suduko(int **arr,int n){
-    if(n==6){
-    count=8;
-    }else if(n==9){
-        count=16;
-    }
-    else if(n==8){
-        count =12;
-    }
-    else
-    count=8;
-    while(count){
-    generate(arr,n);
+    return 1;
 }
-print(arr,n);
+
+void generate_sudoku(int **arr, int n) {
+    int count = (n == 6) ? 8 : (n == 9) ? 16 : 12;
+    while (count > 0) {
+        int rows = generate_randomr(n);
+        int cols = generate_randomc(n);
+        
+        if (arr[rows][cols] == 0) {
+            int val = generate_randomv(n);
+            if (issafe(arr, rows, cols, val, n)) {
+                arr[rows][cols] = val;
+                count--;
+            }
+        }
+    }
+    print(arr, n);
 }
-//solves the sudoku 
+
 int sudoku_solver(int **arr, int n) {
-	    for (int i = 0; i < n; i++) {
-	        for (int j = 0; j < n; j++) {
-	            if (arr[i][j] == 0) {
-	                for (int val = 1; val <= n; val++) {
-	                    if (issafe(arr, i, j, val, n)) {
-	                        arr[i][j] = val;
-	                        if (sudoku_solver(arr, n)) {
-	                            if (i == (n - 1) && j == (n - 1)) {
-	                                print(arr, n);
-	                                arr[i][j] = 0;// backtracking for multiple solutions
-	                            } else
-	                                return 1;
-	                        } else
-	                            arr[i][j] = 0; // backtracking for solution
-	                    }
-	                }
-	                return 0;
-	            }
-	        }
-	        
-	    }
-	    return 1;
-	}
-int main()
-{       int n,x,var;
-        FILE *file;
-        sudoku();
-        printf("enter the order of suduko :");
-        scanf("%d",&n);
-         int **arr = (int **)malloc(n * sizeof(int *));
-	    for (int i = 0; i < n; i++) {
-	       arr[i] = (int *)malloc(n * sizeof(int));
-	    }
-	    repeat:
-	    printf("if you want a to generate a new suduko 0 \n");
-	    printf("if you want to solve the suduko given from file enter 1");
-	    scanf("%d",&x);
-	    if(x==0){
-        generate_suduko(arr,n);
-        printf("\a");
-        printf("if you want ans for the above question give n value");
-        scanf("%d",&n);
-	    }
-	    else if(x==1){
-	   //taking input from file
-	   switch(n){
-	    	case 6:file=fopen("sudokuinput6.txt","r");
-	    	break;
-	    	case 8:file=fopen("sudokuinput8.txt","r");
-	    	break;
-	    	case 9:file=fopen("sudokuinput9.txt","r");
-		}
-	   for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            fscanf(file,"%d",&var);
-            question[i][j]=arr[i][j]=var;
+            if (arr[i][j] == 0) {
+                for (int val = 1; val <= n; val++) {
+                    if (issafe(arr, i, j, val, n)) {
+                        arr[i][j] = val;
+                        if (sudoku_solver(arr, n))
+                            return 1;
+                        arr[i][j] = 0;
+                    }
+                }
+                return 0;
+            }
         }
+    }
+    return 1;
+}
+
+int main() {
+    srand(time(NULL));
+    int n, x;
+    FILE *file;
+    
+    printf("Enter the order of Sudoku (6, 8, or 9): ");
+    scanf("%d", &n);
+
+    int **arr = (int **)malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++) {
+        arr[i] = (int *)calloc(n, sizeof(int));
+    }
+    printf("If you want to generate a new Sudoku, enter 0\n");
+    printf("If you want to solve a Sudoku given in a file, enter 1\n");
+    scanf("%d", &x);
+
+    if (x == 0) {
+        generate_sudoku(arr, n);
+    } 
+    else if (x == 1) {
+        switch(n) {
+            case 6: file = fopen("sudokuinput6.txt", "r"); break;
+            case 8: file = fopen("sudokuinput8.txt", "r"); break;
+            case 9: file = fopen("sudokuinput9.txt", "r"); break;
+            default: printf("Invalid Sudoku order.\n"); return 1;
         }
-        print(arr,n);
-	    }
-	    else {
-	        printf("invalid choice");
-	        system("cls");
-	        goto repeat;
-	    }
+        if (!file) {
+            printf("Failed to open file.\n");
+            return 1;
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                fscanf(file, "%d", &arr[i][j]);
+            }
+        }
+        fclose(file);
+        print(arr, n);
+    }
+    else {
+        printf("Invalid choice.\n");
+        for (int i = 0; i < n; i++)
+            free(arr[i]);
+        free(arr);
+        return 1;
+    }
     if (sudoku_solver(arr, n)) {
-	        // Solution found
-	    } 
-	    else {
-	        if (k-1== 0){
-	            printf("No solution exists.\n");
-	            
-	        }
-	        else
-	            printf("Only %d solutions exist.\n", k-1);
-	    }
-    printf("\a");
-    //printf("%d",generate_random(n));
+        print(arr, n);
+    } else {
+        printf("No solution exists.\n");
+    }
+    for (int i = 0; i < n; i++)
+        free(arr[i]);
+    free(arr);
+
     return 0;
 }
